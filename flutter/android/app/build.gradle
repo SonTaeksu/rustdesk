@@ -14,6 +14,16 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// HUEN: 변형별 applicationId. build-android.ps1 이 huen.properties 에 기록한다.
+// 파일이 없으면 고객용 기본값. (코드 네임스페이스/JNI 는 com.carriez.* 그대로 — applicationId 만 분리)
+def huenProperties = new Properties()
+def huenPropertiesFile = rootProject.file('huen.properties')
+if (huenPropertiesFile.exists()) {
+    huenProperties.load(new FileInputStream(huenPropertiesFile))
+}
+def huenAppId = huenProperties.getProperty('applicationId') ?: 'com.example.remotedesk'
+def huenAppLabel = huenProperties.getProperty('appLabel') ?: 'Remote Desktop'
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -96,8 +106,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.carriez.flutter_hbb"
+        // HUEN: 변형별 applicationId (huen.properties 에서 주입; 고객/상담원 분리).
+        applicationId huenAppId
+        // HUEN: 변형별 표시 이름(런처 앱 이름) — Manifest 의 android:label="${appLabel}" 치환.
+        manifestPlaceholders += [appLabel: huenAppLabel]
         minSdkVersion 22
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()

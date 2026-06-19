@@ -82,9 +82,13 @@ fn main() {
     install_android_deps();
     #[cfg(all(windows, feature = "inline"))]
     build_manifest();
-    #[cfg(windows)]
-    build_windows();
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
+    // HUEN: build_windows()가 호스트 cfg(#[cfg(windows)])로만 걸려 있어 android 크로스 시에도
+    //       windows.cc(windows.h)를 컴파일했음 → 타겟이 windows일 때만 호출.
+    #[cfg(windows)]
+    if target_os == "windows" {
+        build_windows();
+    }
     if target_os == "macos" {
         #[cfg(target_os = "macos")]
         build_mac();

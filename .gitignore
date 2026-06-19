@@ -24,6 +24,10 @@ src/bridge_generated.io.rs
 *deb
 rustdesk
 *.cache
+# HUEN: 포터블 패커가 매 빌드 기록하는 timestamp 산출물 (커밋 불필요)
+libs/portable/app_metadata.toml
+# HUEN: 실제 배포 설정값(서버/키/AAD/패키지명) — git에 올리지 않음
+build-config.ps1
 # appimage
 appimage/AppDir
 appimage/*.AppImage

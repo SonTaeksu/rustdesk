@@ -27,6 +27,27 @@ flutter_build_dir_2 = f'flutter/{flutter_build_dir}'
 skip_cargo = False
 
 
+def huen_dart_defines():
+    """HUEN: 상담원(스태프) 빌드용 dart-define 을 환경변수에서 구성한다.
+    RUSTDESK_TECHNICIAN 이 (비어있지 않게) 설정된 경우에만 게이트 관련 define 들이 붙는다.
+    고객 빌드는 이 환경변수들이 없으므로 빈 문자열 → 게이트 없음.
+      RUSTDESK_TECHNICIAN     = 1
+      RUSTDESK_AAD_TENANT     = <tenant id>
+      RUSTDESK_AAD_CLIENT     = <client id>
+      RUSTDESK_AAD_CONFIG_URL = https://<your-server>/authconfig/config"""
+    defines = ''
+    for k in [
+        'RUSTDESK_TECHNICIAN',
+        'RUSTDESK_AAD_TENANT',
+        'RUSTDESK_AAD_CLIENT',
+        'RUSTDESK_AAD_CONFIG_URL',
+    ]:
+        v = os.environ.get(k)
+        if v:
+            defines += f' --dart-define={k}={v}'
+    return defines
+
+
 def get_deb_arch() -> str:
     custom_arch = os.environ.get("DEB_ARCH")
     if custom_arch is None:
@@ -321,7 +342,7 @@ def build_flutter_deb(version, features):
         system2(f'cargo build --locked --features {features} --lib --release')
         ffi_bindgen_function_refactor()
     os.chdir('flutter')
-    system2('flutter build linux --release')
+    system2('flutter build linux --release' + huen_dart_defines())
     system2('mkdir -p tmpdeb/usr/bin/')
     system2('mkdir -p tmpdeb/usr/share/rustdesk')
     system2('mkdir -p tmpdeb/etc/rustdesk/')
@@ -416,7 +437,7 @@ def build_flutter_dmg(version, features):
     # FLUTTER_XCODE_* env vars are forwarded to xcodebuild as build settings.
     mac_arch = 'arm64' if platform.machine().lower() in ('arm64', 'aarch64') else 'x86_64'
     system2(
-        f'FLUTTER_XCODE_ARCHS={mac_arch} FLUTTER_XCODE_ONLY_ACTIVE_ARCH=YES flutter build macos --release')
+        f'FLUTTER_XCODE_ARCHS={mac_arch} FLUTTER_XCODE_ONLY_ACTIVE_ARCH=YES flutter build macos --release' + huen_dart_defines())
     system2('cp -rf ../target/release/service ./build/macos/Build/Products/Release/RustDesk.app/Contents/MacOS/')
     '''
     system2(
@@ -431,7 +452,7 @@ def build_flutter_arch_manjaro(version, features):
         system2(f'cargo build --locked --features {features} --lib --release')
     ffi_bindgen_function_refactor()
     os.chdir('flutter')
-    system2('flutter build linux --release')
+    system2('flutter build linux --release' + huen_dart_defines())
     system2(f'strip {flutter_build_dir}/lib/librustdesk.so')
     os.chdir('../res')
     system2('HBB=`pwd`/.. FLUTTER=1 makepkg -f')
@@ -444,7 +465,7 @@ def build_flutter_windows(version, features, skip_portable_pack):
             print("cargo build failed, please check rust source code.")
             exit(-1)
     os.chdir('flutter')
-    system2('flutter build windows --release')
+    system2('flutter build windows --release' + huen_dart_defines())
     os.chdir('..')
     shutil.copy2('target/release/deps/dylib_virtual_display.dll',
                  flutter_build_dir_2)

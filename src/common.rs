@@ -2082,6 +2082,70 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
 }
 
 pub fn load_custom_client() {
+    // ===== HUEN custom support client: baked-in server + incoming-only + WSS =====
+    {
+        // ★ 빌드타임 환경변수 ★
+        //   RUSTDESK_SERVER     : rendezvous 서버 도메인 (필수 — 미설정 시 컴파일 에러)
+        //   RUSTDESK_TECHNICIAN : 값이 있으면 상담원용(풀 클라 + M365 게이트), 없으면 고객용(받기전용)
+        //   RUSTDESK_KEY        : 서버 공개키 id_ed25519.pub
+        //                          · 고객 빌드 → 필수(exe에 baked)
+        //                          · 상담원 빌드 → 설정 안 함(exe에 키 없음). 런타임에 M365(AAD)
+        //                            인증 통과 후 서버에서 받아 OVERWRITE(in-memory)로 주입.
+        const RUSTDESK_SERVER: &str = env!(
+            "RUSTDESK_SERVER",
+            "RUSTDESK_SERVER must be set at build time (rendezvous server domain)"
+        );
+        const RUSTDESK_KEY: Option<&str> = option_env!("RUSTDESK_KEY");
+        // 빈 문자열("")도 "고객(상담원 아님)"으로 취급 — PowerShell `$env:X=$null` 이 빈 값으로
+        // 남더라도 고객 빌드가 상담원로 오인되지 않도록.
+        const RUSTDESK_TECHNICIAN: bool = match option_env!("RUSTDESK_TECHNICIAN") {
+            Some(s) => !s.is_empty(),
+            None => false,
+        };
+
+        // 고객(받기전용) 빌드인데 키가 없으면 빌드 설정 오류 → 즉시 중단(키 없는 고객 빌드 출하 방지).
+        if RUSTDESK_KEY.is_none() && !RUSTDESK_TECHNICIAN {
+            panic!("RUSTDESK_KEY must be set for customer builds (set RUSTDESK_TECHNICIAN for staff builds that fetch the key after M365 login)");
+        }
+
+        // HUEN: RustDesk 기본 계정/주소록(Pro 기능, OSS 미사용) UI 숨김
+        config::HARD_SETTINGS
+            .write()
+            .unwrap()
+            .insert("disable-account".to_owned(), "Y".to_owned());
+        // HUEN: 네트워크 탭의 서버/키(ID·릴레이·API·Key) + WS 토글 숨김 (전부 baked라 노출/변경 불필요).
+        //       프록시는 남겨둠(사내 프록시 고객용). 탭 전체 숨김은 OPTION_HIDE_NETWORK_SETTINGS.
+        {
+            let mut b = config::BUILTIN_SETTINGS.write().unwrap();
+            b.insert(keys::OPTION_HIDE_SERVER_SETTINGS.to_owned(), "Y".to_owned());
+            b.insert(keys::OPTION_HIDE_WEBSOCKET_SETTINGS.to_owned(), "Y".to_owned());
+        }
+
+        if !RUSTDESK_TECHNICIAN {
+            config::HARD_SETTINGS
+                .write()
+                .unwrap()
+                .insert("conn-type".to_owned(), "incoming".to_owned());
+        }
+        let mut ov = config::OVERWRITE_SETTINGS.write().unwrap();
+        ov.insert(
+            keys::OPTION_CUSTOM_RENDEZVOUS_SERVER.to_owned(),
+            RUSTDESK_SERVER.to_owned(),
+        );
+        // 상담원 빌드는 키를 안 박음(런타임 AAD 후 in-memory 주입). 고객 빌드만 baked.
+        if let Some(key) = RUSTDESK_KEY {
+            if !key.is_empty() {
+                ov.insert(keys::OPTION_KEY.to_owned(), key.to_owned());
+            }
+        }
+        ov.insert(keys::OPTION_ALLOW_WEBSOCKET.to_owned(), "Y".to_owned());
+        // api-server가 "https"로 시작해야 wss:// 사용 (hbb_common/src/websocket.rs check_ws)
+        ov.insert(
+            keys::OPTION_API_SERVER.to_owned(),
+            format!("https://{}", RUSTDESK_SERVER),
+        );
+    }
+    // ===== end HUEN config =====
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());

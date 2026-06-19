@@ -24,6 +24,7 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'common.dart';
+import 'common/huen_aad_gate.dart';
 import 'consts.dart';
 import 'mobile/pages/home_page.dart';
 import 'mobile/pages/server_page.dart';
@@ -515,10 +516,14 @@ class _AppState extends State<App> with WidgetsBindingObserver {
           darkTheme: MyTheme.darkTheme,
           themeMode: MyTheme.currentThemeMode(),
           home: isDesktop
-              ? const DesktopTabPage()
+              ? (huenIsStaffBuild
+                  ? HuenAadGate(child: const DesktopTabPage())
+                  : const DesktopTabPage())
               : isWeb
                   ? WebHomePage()
-                  : HomePage(),
+                  : (huenIsStaffBuild
+                      ? HuenAadGate(child: HomePage())
+                      : HomePage()),
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,

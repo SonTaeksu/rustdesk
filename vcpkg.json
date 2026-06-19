@@ -86,6 +86,14 @@
       "name": "ffmpeg",
       "host": false,
       "platform": "((android | ios | (linux & arm32)) & static)"
+    },
+    {
+      "name": "libsodium",
+      "platform": "android"
+    },
+    {
+      "name": "openssl",
+      "platform": "android"
     }
   ],
   "vcpkg-configuration": {

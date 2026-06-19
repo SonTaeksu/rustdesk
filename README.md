@@ -1,3 +1,11 @@
+> **🔧 Fork 안내** — 이 저장소는 [RustDesk](https://github.com/rustdesk/rustdesk)의 fork입니다. 라이선스는 원본과 동일한 **AGPL-3.0**([LICENCE](LICENCE)).
+>
+> **주요 변경점:** 빌드타임에 서버·키·모드를 baked — **고객용**(받기전용 + 공개키)과 **상담원용**(M365 로그인 후 런타임에 키 수신)으로 분리 · 네트워크 설정 UI 숨김 · WebSocket(WSS) 기본 허용 · 상담원용 M365 device-code 로그인 게이트 · Android 변형별 패키지명/아이콘 · Windows/Android 빌드 스크립트.
+>
+> 빌드 방법과 전체 변경점: **[BUILD-HUEN.md](BUILD-HUEN.md)**. (배포 비밀값은 커밋하지 않음 — `build-config.ps1`)
+
+---
+
 <p align="center">
   <img src="res/logo-header.svg" alt="RustDesk - Your remote desktop"><br>
   <a href="#raw-steps-to-build">Build</a> •

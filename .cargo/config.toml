@@ -14,5 +14,12 @@ rustflags = [
 #rustflags = [
 #    "-C", "link-args=-Wl,-Bstatic -lc -Wl,-Bdynamic"
 #]
+# HUEN: android 크로스 시 libsodium-sys(호스트 빌드스크립트)와 충돌 방지 —
+#       android 타겟만 vcpkg가 만든 android libsodium 을 링크하도록 오버라이드.
+#       (이 타겟에선 libsodium-sys 빌드스크립트 미실행. 호스트는 평소대로 windows libsodium 사용)
+[target.aarch64-linux-android.sodium]
+rustc-link-search = ["native=C:/vcpkg/installed/arm64-android/lib"]
+rustc-link-lib = ["static=sodium"]
+
 [net]
 git-fetch-with-cli = true

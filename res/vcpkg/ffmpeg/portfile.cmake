@@ -87,7 +87,7 @@ if(VCPKG_HOST_IS_WINDOWS)
     vcpkg_acquire_msys(MSYS_ROOT PACKAGES automake1.16)
     set(SHELL "${MSYS_ROOT}/usr/bin/bash.exe")
     vcpkg_add_to_path("${MSYS_ROOT}/usr/share/automake-1.16")
-    string(APPEND OPTIONS " --pkg-config=${CURRENT_HOST_INSTALLED_DIR}/tools/pkgconf/pkgconf${VCPKG_HOST_EXECUTABLE_SUFFIX}")
+    string(APPEND OPTIONS " --pkg-config=${CURRENT_HOST_INSTALLED_DIR}/tools/pkgconf/pkgconf${VCPKG_HOST_EXECUTABLE_SUFFIX} ")
 else()
     find_program(SHELL bash)
 endif()
@@ -183,6 +183,10 @@ elseif(VCPKG_TARGET_IS_IOS)
 --extra-ldflags=\"-arch arm64 -mios-version-min=8.0 -fembed-bitcode\" \
 ")
 elseif(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
+    # HUEN: Windows cross-compile 시 NDK clang에 target/sysroot가 안 들어가 헤더(ctype.h 등)를
+    #       못 찾는 문제 → android 타겟+sysroot 명시. (API 28 = vcpkg android 기본값)
+    file(TO_CMAKE_PATH "$ENV{ANDROID_NDK_HOME}" _huen_ndk)
+    set(_huen_sysroot "${_huen_ndk}/toolchains/llvm/prebuilt/windows-x86_64/sysroot")
     string(APPEND OPTIONS "\
 --target-os=android \
 --disable-asm \
@@ -194,6 +198,10 @@ elseif(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
 --enable-encoder=hevc_mediacodec \
 --enable-decoder=h264_mediacodec \
 --enable-decoder=hevc_mediacodec \
+--extra-cflags=\"--target=aarch64-linux-android28 --sysroot=${_huen_sysroot}\" \
+--extra-ldflags=\"--target=aarch64-linux-android28 --sysroot=${_huen_sysroot}\" \
+--host-cflags=\"--sysroot=${_huen_sysroot}\" \
+--host-ldflags=\"--sysroot=${_huen_sysroot}\" \
 ")
 endif()
 

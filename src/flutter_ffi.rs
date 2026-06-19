@@ -1041,6 +1041,13 @@ pub fn main_get_options_sync() -> SyncReturn<String> {
     SyncReturn(get_options())
 }
 
+// HUEN: 런타임에 OVERWRITE_SETTINGS(in-memory, 비영구)에 값 주입.
+//       스태프 빌드가 M365 인증 후 받은 서버 키를 디스크(toml)에 남기지 않고 적용할 때 사용.
+//       재시작하면 사라지므로 매 실행마다 AAD 재인증이 필요 → exe만으론 접속 불가(airtight).
+pub fn main_set_override_option(key: String, value: String) {
+    config::OVERWRITE_SETTINGS.write().unwrap().insert(key, value);
+}
+
 pub fn main_set_options(json: String) {
     let mut map: HashMap<String, String> = serde_json::from_str(&json).unwrap_or(HashMap::new());
     #[cfg(target_os = "android")]

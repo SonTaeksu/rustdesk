@@ -124,11 +124,13 @@ dependency_overrides:
   intl: ^0.19.0
   flutter_plugin_android_lifecycle: 2.0.17
 
-# rerun: flutter pub run flutter_launcher_icons
-flutter_icons:
+# rerun: dart run flutter_launcher_icons   (구버전 명령: flutter pub run flutter_launcher_icons)
+flutter_launcher_icons:
   image_path: "../res/icon.png"
   remove_alpha_ios: true
   android: true
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "../res/icon_fg.png"
   ios: true
   windows:
     generate: true
