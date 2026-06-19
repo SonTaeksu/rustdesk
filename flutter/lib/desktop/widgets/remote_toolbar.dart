@@ -808,7 +808,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
     toolbarItems.add(_PinMenu(state: widget.state));
     toolbarItems.add(Obx(() {
       if ((PrivacyModeState.find(widget.id).isEmpty ||
-              allowDisplaySwitchInPrivacyMode(pi)) &&
+              allowDisplaySwitchInPrivacyMode(pi, PrivacyModeState.find(widget.id).value)) &&
           pi.displaysCount.value > 1 &&
           mainGetLocalBoolOptionSync(kOptionAllowMonitorSwitchMainToolbar)) {
         return _MainMonitorSwitchButton(id: widget.id, ffi: widget.ffi);
@@ -3523,7 +3523,7 @@ class _MinimizedMonitorSwitchButton extends StatelessWidget {
       }
       if (cycle.total < 2) return const Offstage();
       if (PrivacyModeState.find(id).isNotEmpty &&
-          !allowDisplaySwitchInPrivacyMode(ffi.ffiModel.pi)) {
+          !allowDisplaySwitchInPrivacyMode(ffi.ffiModel.pi, PrivacyModeState.find(id).value)) {
         return const Offstage();
       }
 
