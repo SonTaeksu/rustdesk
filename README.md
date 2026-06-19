@@ -1,8 +1,12 @@
-> **🔧 Fork 안내** — 이 저장소는 [RustDesk](https://github.com/rustdesk/rustdesk)의 fork입니다. 라이선스는 원본과 동일한 **AGPL-3.0**([LICENCE](LICENCE)).
+> **🔧 HUEN fork — 핵심: 방화벽 포트 개방 없이 WebSocket(WSS/443)으로 원격지원**
 >
-> **주요 변경점:** 빌드타임에 서버·키·모드를 baked — **고객용**(받기전용 + 공개키)과 **상담원용**(M365 로그인 후 런타임에 키 수신)으로 분리 · 네트워크 설정 UI 숨김 · WebSocket(WSS) 기본 허용 · 상담원용 M365 device-code 로그인 게이트 · Android 변형별 패키지명/아이콘 · Windows/Android 빌드 스크립트.
+> [RustDesk](https://github.com/rustdesk/rustdesk)의 fork입니다 (License **AGPL-3.0**, [LICENCE](LICENCE)).
 >
-> 빌드 방법과 전체 변경점: **[BUILD-HUEN.md](BUILD-HUEN.md)**. (배포 비밀값은 커밋하지 않음 — `build-config.ps1`)
+> **★ 주 기능 — WebSocket(WSS):** stock RustDesk는 피제어 PC가 rendezvous/relay 포트(**21115-21119 + UDP**)로 아웃바운드 연결해야 합니다. 이 fork는 **WSS(443) 한 포트**로만 붙으므로 **고객 방화벽에 별도 포트를 열 필요가 전혀 없습니다** — 일반 HTTPS 아웃바운드만 허용되면(대부분의 사내망) 원격지원이 됩니다.
+>
+> **그 외 변경점:** 빌드타임에 서버·키·모드 baked — **고객용**(받기전용 + 공개키) / **상담원용**(M365 로그인 후 런타임 키 수신) · 네트워크 설정 UI 숨김 · M365 device-code 로그인 게이트 · Android 변형별 패키지명/아이콘 · Windows/Android 빌드 스크립트.
+>
+> 빌드·전체 변경점: **[BUILD-HUEN.md](BUILD-HUEN.md)** (배포 비밀값은 커밋 안 함 — `build-config.ps1`).
 
 ---
 
